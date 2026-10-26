@@ -83,6 +83,8 @@ export function composeOmoSenpiExtension(
 
   return async (pi: unknown): Promise<void> => {
     releaseHerdrAgentHint()
+    // Shell children inherit process.env: a bundled skill's Python must not write __pycache__ into a signed app (#11373).
+    process.env.PYTHONDONTWRITEBYTECODE ??= "1"
     // Publish the dag eval sdk directory so JavaScript cells can import it from OMO_DAG_SDK_ROOT.
     provisionDagSdkRoot()
     provisionAgentToolkitSdkRoot()

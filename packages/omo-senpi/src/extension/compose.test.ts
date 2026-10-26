@@ -133,6 +133,26 @@ describe("composeOmoSenpiExtension", () => {
     expect(pi.tools).toEqual([])
   })
 
+  it("#given the host environment #when composed #then agent-run Python skips bytecode unless the user chose a value (#11373)", async () => {
+    // given
+    const previous = process.env.PYTHONDONTWRITEBYTECODE
+    try {
+      for (const [initial, expected] of [[undefined, "1"], ["", ""]] as const) {
+        if (initial === undefined) delete process.env.PYTHONDONTWRITEBYTECODE
+        else process.env.PYTHONDONTWRITEBYTECODE = initial
+
+        // when
+        await composeOmoSenpiExtension([])(new FakeExtensionAPI())
+
+        // then
+        expect(process.env.PYTHONDONTWRITEBYTECODE).toBe(expected)
+      }
+    } finally {
+      if (previous === undefined) delete process.env.PYTHONDONTWRITEBYTECODE
+      else process.env.PYTHONDONTWRITEBYTECODE = previous
+    }
+  })
+
   it("#given a component throws #when composed #then logs the error and registers later components", async () => {
     // given
     const pi = new FakeExtensionAPI()
